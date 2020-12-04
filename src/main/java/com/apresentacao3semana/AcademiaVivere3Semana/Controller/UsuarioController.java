@@ -33,30 +33,28 @@ public class UsuarioController {
 
     @GetMapping("/usuarios/search")
     Iterable<Usuario> findByQuery(
-            @RequestParam(value = "nome", required = false) String Nome, @RequestParam(value = "email", required = false) String Email)
-    {
-        if(Nome!=null && Email!=null)
-            return usuarioRepository.findByNomeAndEmail(Nome,Email);
-        else if(Nome!=null)
+            @RequestParam(value = "nome", required = false) String Nome, @RequestParam(value = "email", required = false) String Email) {
+        if (Nome != null && Email != null)
+            return usuarioRepository.findByNomeAndEmail(Nome, Email);
+        else if (Nome != null)
             return usuarioRepository.findByNome(Nome);
-        else if(Email!=null)
+        else if (Email != null)
             return usuarioRepository.findByEmail(Email);
         else
             return usuarioRepository.findAll();
     }
 
     @GetMapping("/usuarios/login")
-    public Map<String,Boolean> loginQuery(
-            @RequestParam(value = "login", required = false) String login, @RequestParam(value = "senha", required = false) String senha)
-    {
+    public Map<String, Boolean> loginQuery(
+            @RequestParam(value = "login", required = false) String login, @RequestParam(value = "senha", required = false) String senha) {
         Map<String, Boolean> response = new HashMap<>();
 
-        if(login.isEmpty() || senha.isEmpty()){
+        if (login.isEmpty() || senha.isEmpty()) {
             response.put("Login e Senha obrigatórios!", Boolean.FALSE);
             return response;
-        }else {
+        } else {
             Usuario usuarioLogin = usuarioRepository.findByLogin(login);
-            if (usuarioLogin==null) {
+            if (usuarioLogin == null) {
                 response.put("Login não existe!", Boolean.FALSE);
                 return response;
             } else if (!usuarioLogin.getSenha().equals(senha)) {
@@ -111,8 +109,4 @@ public class UsuarioController {
         return response;
     }
 
-    @DeleteMapping("/usuarios")
-    public void deleteUser() {
-        usuarioRepository.deleteAll();
-    }
 }

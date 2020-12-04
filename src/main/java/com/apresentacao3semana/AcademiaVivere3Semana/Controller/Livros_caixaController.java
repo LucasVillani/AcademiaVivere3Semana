@@ -3,6 +3,7 @@ package com.apresentacao3semana.AcademiaVivere3Semana.Controller;
 import com.apresentacao3semana.AcademiaVivere3Semana.Entity.Clientes;
 import com.apresentacao3semana.AcademiaVivere3Semana.Entity.Livro_Caixa;
 import com.apresentacao3semana.AcademiaVivere3Semana.Exception.ResourceNotFoundException;
+import com.apresentacao3semana.AcademiaVivere3Semana.Repository.ClientesRepository;
 import com.apresentacao3semana.AcademiaVivere3Semana.Repository.Livros_caixaRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -10,9 +11,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 @RestController
 @RequestMapping("vivere/")
@@ -20,10 +19,14 @@ public class Livros_caixaController {
 
     @Autowired
     private Livros_caixaRepository livros_caixaRepository;
+    @Autowired
+    private ClientesRepository clientesRepository;
 
     @GetMapping("/livros_caixa")
     public List<Livro_Caixa> getAllUsers() {
-        return this.livros_caixaRepository.findAll();
+        List<Livro_Caixa> livro_caixas = livros_caixaRepository.findAll();
+        Collections.sort(livro_caixas);
+        return livro_caixas;
     }
 
     @GetMapping("/livros_caixa/{id}")
@@ -34,25 +37,35 @@ public class Livros_caixaController {
         return ResponseEntity.ok().body(livro_caixa);
     }
 
+    @GetMapping("/livros_caixa/clienteId/{clienteId}")
+    public List<Livro_Caixa> getUserByClienteId(
+            @PathVariable(value = "clienteId") Integer clienteId) throws ResourceNotFoundException {
+        Clientes clientes = clientesRepository.findById(clienteId)
+                .orElseThrow(() -> new ResourceNotFoundException("Usuário não econtrado :: " + clienteId));
+        return livros_caixaRepository.findAllByCliente(clientes);
+    }
+
     @PostMapping("/livros_caixa")
     Livro_Caixa createUser(@Valid @RequestBody Livro_Caixa livro_caixa) {
         return livros_caixaRepository.save(livro_caixa);
     }
 
-//    @PutMapping("/users/{id}")
-//    public ResponseEntity<Livro_Caixa> updateUser(
-//            @PathVariable(value = "id") int livros_caixaId,
-//            @Valid @RequestBody Livro_Caixa livro_caixaDetails) throws ResourceNotFoundException {
-//        Livro_Caixa livro_caixa = livros_caixaRepository.findById(livros_caixaId)
-//                .orElseThrow(() -> new ResourceNotFoundException("User not found :: " + livros_caixaId));
-//
-//        livro_caixa.setId(userDetails.getEmailId());
-//        livro_caixa.setLastName(userDetails.getLastName());
-//        livro_caixa.setFirstName(userDetails.getFirstName());
-//        livro_caixa.setLastModifiedDate(new Date());
-//        final Livro_Caixa updatedUser = livros_caixaRepository.save(livro_caixa);
-//        return ResponseEntity.ok(updatedUser);
-//    }
+    @PutMapping("/livros_caixa/{id}")
+    public ResponseEntity<Livro_Caixa> updateUser(
+            @PathVariable(value = "id") int livros_caixaId,
+            @Valid @RequestBody Livro_Caixa livro_caixaDetails) throws ResourceNotFoundException {
+        Livro_Caixa livro_caixa = livros_caixaRepository.findById(livros_caixaId)
+                .orElseThrow(() -> new ResourceNotFoundException("User not found :: " + livros_caixaId));
+
+        livro_caixa.setID(livro_caixaDetails.getID());
+        livro_caixa.setTipo(livro_caixaDetails.getTipo());
+        livro_caixa.setDescricao(livro_caixaDetails.getDescricao());
+        livro_caixa.setData_lancamento(livro_caixaDetails.getData_lancamento());
+        livro_caixa.setValor(livro_caixaDetails.getValor());
+        livro_caixa.setCliente(livro_caixaDetails.getCliente());
+        final Livro_Caixa updatedLivros_Caixa = livros_caixaRepository.save(livro_caixa);
+        return ResponseEntity.ok(updatedLivros_Caixa);
+    }
 
     @DeleteMapping("/livros_caixa/{id}")
     public Map<String, Boolean> deleteUser(
@@ -66,8 +79,4 @@ public class Livros_caixaController {
         return response;
     }
 
-    @DeleteMapping("/livros_caixa")
-    public void deleteUser() {
-        livros_caixaRepository.deleteAll();
-    }
 }

@@ -21,7 +21,7 @@ public class Livro_Caixa implements Comparable<Livro_Caixa>{
     @Column(name = "id")
     private Integer ID;
 
-    @ManyToOne(optional = false,cascade = CascadeType.ALL)
+    @ManyToOne(optional = false)
     @JoinColumn(name = "clienteId",nullable = false)
     private Clientes cliente;
 
